@@ -53,15 +53,9 @@ namespace RaidPrevention
                 StructureManager.tryGetInfo(structureTransform, out byte xr, out byte yr, out ushort index, out StructureRegion structureRegion);
                 StructureData structure = StructureManager.regions[xr, yr].structures[index];
                 UnturnedPlayer player = UnturnedPlayer.FromCSteamID(instigatorSteamID);
-                if (player.IsAdmin)
-                {
-                    return;
-                }
 
-                if ((ulong)player.SteamGroupID == structure.group | (ulong)instigatorSteamID == structure.owner)
-                {
-                    return;
-                }
+                if (player.IsAdmin) return;
+                if ((ulong)player.SteamGroupID == structure.group | (ulong)instigatorSteamID == structure.owner) return;
 
                 if (structure.structure.health - pendingTotalDamage <= 0)
                 {
