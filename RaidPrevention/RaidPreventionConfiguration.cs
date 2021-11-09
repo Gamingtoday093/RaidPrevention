@@ -11,11 +11,21 @@ namespace RaidPrevention
     public class RaidPreventionConfiguration : IRocketPluginConfiguration
     {
         public string MessageColour { get; set; }
+        public bool LogToConsole { get; set; }
+        public string DiscordWebhookURL { get; set; }
+        public string ByPassPermission { get; set; }
+        public bool AllowSelfDestruction { get; set; }
+        public bool AllowGroupDestruction { get; set; }
         [XmlArrayItem("BarricadeStructureID")]
         public ushort[] BarricadeStructureIDs { get; set; }
         public void LoadDefaults()
         {
             MessageColour = "yellow";
+            LogToConsole = true;
+            DiscordWebhookURL = "Webhook";
+            ByPassPermission = "RaidPrevention.Bypass";
+            AllowSelfDestruction = true;
+            AllowGroupDestruction = true;
             BarricadeStructureIDs = new ushort[]
             {
                 40300,
