@@ -14,6 +14,7 @@ namespace RaidPrevention
         public bool LogToConsole { get; set; }
         public string DiscordWebhookURL { get; set; }
         public string ByPassPermission { get; set; }
+        public bool AdminByPass { get; set; }
         public bool AllowSelfDestruction { get; set; }
         public bool AllowGroupDestruction { get; set; }
         [XmlArrayItem("BarricadeStructureID")]
@@ -24,6 +25,7 @@ namespace RaidPrevention
             LogToConsole = true;
             DiscordWebhookURL = "Webhook";
             ByPassPermission = "RaidPrevention.Bypass";
+            AdminByPass = true;
             AllowSelfDestruction = true;
             AllowGroupDestruction = true;
             BarricadeStructureIDs = new ushort[]
