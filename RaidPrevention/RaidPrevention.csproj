@@ -31,23 +31,31 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>..\..\TeamJoiner\TeamJoiner\libraries\Assembly-CSharp.dll</HintPath>
+    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Podracing\Podracing\libraries\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.API">
-      <HintPath>..\..\TeamJoiner\TeamJoiner\libraries\Rocket.API.dll</HintPath>
+    <Reference Include="com.rlabrecque.steamworks.net">
+      <HintPath>..\..\Podracing\Podracing\libraries\com.rlabrecque.steamworks.net.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Core">
-      <HintPath>..\..\TeamJoiner\TeamJoiner\libraries\Rocket.Core.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\Podracing\Podracing\libraries\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Unturned">
-      <HintPath>..\..\TeamJoiner\TeamJoiner\libraries\Rocket.Unturned.dll</HintPath>
+    <Reference Include="Rocket.API, Version=4.9.3.4, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Podracing\Podracing\libraries\Rocket.API.dll</HintPath>
     </Reference>
-    <Reference Include="SDG.NetTransport">
-      <HintPath>..\..\TeamJoiner\TeamJoiner\libraries\SDG.NetTransport.dll</HintPath>
+    <Reference Include="Rocket.Core, Version=4.9.3.4, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Podracing\Podracing\libraries\Rocket.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Steamworks.NET">
-      <HintPath>..\..\TeamJoiner\TeamJoiner\libraries\Steamworks.NET.dll</HintPath>
+    <Reference Include="Rocket.Unturned, Version=4.9.3.13, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Podracing\Podracing\libraries\Rocket.Unturned.dll</HintPath>
+    </Reference>
+    <Reference Include="SDG.NetTransport, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Podracing\Podracing\libraries\SDG.NetTransport.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -57,11 +65,13 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="UnityEngine">
-      <HintPath>..\..\TeamJoiner\TeamJoiner\libraries\UnityEngine.dll</HintPath>
+    <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Podracing\Podracing\libraries\UnityEngine.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>..\..\TeamJoiner\TeamJoiner\libraries\UnityEngine.CoreModule.dll</HintPath>
+    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Podracing\Podracing\libraries\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
