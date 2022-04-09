@@ -60,7 +60,7 @@ namespace RaidPrevention
                 if ((ulong)instigatorSteamID == structure.GetServersideData().owner && Config.AllowSelfDestruction) return;
                 if ((ulong)player.SteamGroupID == structure.GetServersideData().group && player.SteamGroupID != null && Config.AllowGroupDestruction) return;
 
-                if (structure.GetServersideData().structure.health - pendingTotalDamage <= 0)
+                if (structure.GetServersideData().structure.health <= pendingTotalDamage)
                 {
                     pendingTotalDamage = 0;
                     shouldAllow = false;
@@ -89,6 +89,14 @@ namespace RaidPrevention
                 BarricadeDrop barricade = BarricadeManager.FindBarricadeByRootTransform(barricadeTransform);
 
                 UnturnedPlayer player = UnturnedPlayer.FromCSteamID(instigatorSteamID);
+
+                if (player?.Player == null && damageOrigin == EDamageOrigin.Trap_Wear_And_Tear) // Remove Later, Nelson will fix
+                {
+                    pendingTotalDamage = 0;
+                    shouldAllow = false;
+                    return;
+                }
+
                 if (player.IsAdmin && Config.AdminByPass) return;
                 if (((IRocketPlayer)player).HasPermission(Config.ByPassPermission) && !player.IsAdmin) return;
 
@@ -115,7 +123,7 @@ namespace RaidPrevention
                 if ((ulong)instigatorSteamID == barricade.GetServersideData().owner && Config.AllowSelfDestruction) return;
                 if ((ulong)player.SteamGroupID == barricade.GetServersideData().group && player.SteamGroupID != null && Config.AllowGroupDestruction) return;
 
-                if (barricade.GetServersideData().barricade.health - pendingTotalDamage <= 0)
+                if (barricade.GetServersideData().barricade.health <= pendingTotalDamage)
                 {
                     pendingTotalDamage = 0;
                     shouldAllow = false;

@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Rocket.Unturned.Chat;
+using Rocket.Core.Logging;
 
 namespace RaidPrevention.Commands
 {
     class BattleCommand : IRocketCommand
     {
-        public AllowedCaller AllowedCaller => AllowedCaller.Player;
+        public AllowedCaller AllowedCaller => AllowedCaller.Both;
 
         public string Name => "Battle";
 
@@ -33,11 +34,13 @@ namespace RaidPrevention.Commands
             if (command[0].ToLower() == "start")
             {
                 RaidPrevention.Instance.isBattle = true;
+                Logger.Log(RaidPrevention.Instance.Translate("BattleSuccessStart"));
                 UnturnedChat.Say(caller, RaidPrevention.Instance.Translate("BattleSuccessStart"), RaidPrevention.Instance.MessageColour);
                 return;
             } else if (command[0].ToLower() == "stop")
             {
                 RaidPrevention.Instance.isBattle = false;
+                Logger.Log(RaidPrevention.Instance.Translate("BattleSuccessStop"));
                 UnturnedChat.Say(caller, RaidPrevention.Instance.Translate("BattleSuccessStop"), RaidPrevention.Instance.MessageColour);
                 return;
             } else
