@@ -27,6 +27,7 @@ namespace RaidPrevention.Commands
         {
             if (command.Length < 1)
             {
+                Logger.LogError($"RaidPrevention >> {RaidPrevention.Instance.Translate("BattleInvalid")}");
                 UnturnedChat.Say(caller, RaidPrevention.Instance.Translate("BattleInvalid"), RaidPrevention.Instance.MessageColour);
                 return;
             }

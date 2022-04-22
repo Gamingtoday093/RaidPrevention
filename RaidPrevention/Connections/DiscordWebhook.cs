@@ -1,9 +1,10 @@
-﻿using System.Net.Http;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Rocket.Core.Logging;
 using Newtonsoft.Json;
+using System.Net;
+using System.IO;
 
 namespace RaidPrevention.Connections
 {
@@ -11,18 +12,27 @@ namespace RaidPrevention.Connections
     {
         public static async Task SendDiscordWebhook(string URL, string jsonData)
         {
-            HttpClient client = new HttpClient();
-            var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            WebRequest client = WebRequest.Create(URL);
+            client.Method = "POST";
+            client.ContentType = "application/json";
 
-            HttpResponseMessage response = await client.PostAsync(URL, content);
-            if (!response.IsSuccessStatusCode)
+            using (var writer = new StreamWriter(client.GetRequestStream()))
             {
-                Logger.LogError($"[{Assembly.GetExecutingAssembly().FullName.Split(',')[0]}] Status Code: {response.StatusCode} - Failed to Post to Discord API");
+                writer.Write(jsonData);
+                writer.Flush();
             }
-            response.EnsureSuccessStatusCode();
+
+            try
+            {
+                await client.GetResponseAsync();
+            }
+            catch (WebException we)
+            {
+                Logger.LogError($"[{Assembly.GetExecutingAssembly().FullName.Split(',')[0]}] Failed to Post to Discord API - {we}");
+            }
         }
 
-        public static string FormatDiscordWebhook(string Username, string AvatarURL, string Title, string Color, string FooterText, string IconUrl, string PlayerName, ulong SteamID, string Build, string IP)
+        public static string FormatDiscordWebhook(string Username, string AvatarURL, string Title, int Color, string FooterText, string IconUrl, string PlayerName, ulong SteamID, string Build, string IP)
         {
             return JsonConvert.SerializeObject(new 
             {

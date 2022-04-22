@@ -17,6 +17,7 @@ namespace RaidPrevention
         public bool AdminByPass { get; set; }
         public bool AllowSelfDestruction { get; set; }
         public bool AllowGroupDestruction { get; set; }
+        public bool OnlyPreventDestruction { get; set; }
         public bool IsBlacklist { get; set; }
         [XmlArrayItem("BarricadeStructureID")]
         public ushort[] BarricadeStructureIDs { get; set; }
@@ -29,6 +30,7 @@ namespace RaidPrevention
             AdminByPass = true;
             AllowSelfDestruction = true;
             AllowGroupDestruction = true;
+            OnlyPreventDestruction = true;
             IsBlacklist = false;
             BarricadeStructureIDs = new ushort[]
             {

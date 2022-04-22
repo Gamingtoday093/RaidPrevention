@@ -60,20 +60,29 @@ namespace RaidPrevention
                 if ((ulong)instigatorSteamID == structure.GetServersideData().owner && Config.AllowSelfDestruction) return;
                 if ((ulong)player.SteamGroupID == structure.GetServersideData().group && player.SteamGroupID != null && Config.AllowGroupDestruction) return;
 
-                if (structure.GetServersideData().structure.health <= pendingTotalDamage)
+                if (Config.OnlyPreventDestruction && structure.GetServersideData().structure.health > pendingTotalDamage) return;
+
+                pendingTotalDamage = 0;
+                shouldAllow = false;
+                UnturnedChat.Say(player, Translate("PreventedDestruction"), MessageColour);
+                if (Config.LogToConsole)
                 {
-                    pendingTotalDamage = 0;
-                    shouldAllow = false;
-                    UnturnedChat.Say(player, Translate("PreventedDestruction"), MessageColour);
-                    if (Config.LogToConsole)
-                    {
-                        Logger.LogError($"[RaidPrevention] {player.DisplayName} ({instigatorSteamID}) Tried to Destroy {structure.asset.itemName}!");
-                    }
-                    if (Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
-                    {
-                        var task = DiscordWebhook.SendDiscordWebhook(Config.DiscordWebhookURL, DiscordWebhook.FormatDiscordWebhook("Raid Prevention (Global)", "https://unturnedstore.com/api/images/511", "Prevented Destruction", "7127038", "Raid Prevention (Global) by Gamingtoday093", "https://cdn.discordapp.com/attachments/545016765885972494/907732705553317939/User.png", player.DisplayName, instigatorSteamID.m_SteamID, structure.asset.itemName, SteamGameServer.GetPublicIP().ToString()));
-                        Task.Run(async () => await task);
-                    }
+                    Logger.LogError($"[RaidPrevention] {player.DisplayName} ({instigatorSteamID}) Tried to Destroy {structure.asset.itemName}!");
+                }
+                if (Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
+                {
+                    var task = DiscordWebhook.SendDiscordWebhook(Config.DiscordWebhookURL, DiscordWebhook.FormatDiscordWebhook(
+                        "Raid Prevention (Global)",
+                        "https://unturnedstore.com/api/images/511",
+                        "Prevented Destruction",
+                        7127038,
+                        "Raid Prevention (Global) by Gamingtoday093",
+                        "https://cdn.discordapp.com/attachments/545016765885972494/907732705553317939/User.png",
+                        player.DisplayName,
+                        instigatorSteamID.m_SteamID,
+                        structure.asset.itemName,
+                        SteamGameServer.GetPublicIP().ToString()));
+                    Task.Run(async () => await task);
                 }
             }
         }
@@ -89,13 +98,6 @@ namespace RaidPrevention
                 BarricadeDrop barricade = BarricadeManager.FindBarricadeByRootTransform(barricadeTransform);
 
                 UnturnedPlayer player = UnturnedPlayer.FromCSteamID(instigatorSteamID);
-
-                if (player?.Player == null && damageOrigin == EDamageOrigin.Trap_Wear_And_Tear) // Remove Later, Nelson will fix
-                {
-                    pendingTotalDamage = 0;
-                    shouldAllow = false;
-                    return;
-                }
 
                 if (player.IsAdmin && Config.AdminByPass) return;
                 if (((IRocketPlayer)player).HasPermission(Config.ByPassPermission) && !player.IsAdmin) return;
@@ -114,7 +116,16 @@ namespace RaidPrevention
                     }
                     if (Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
                     {
-                        var task = DiscordWebhook.SendDiscordWebhook(Config.DiscordWebhookURL, DiscordWebhook.FormatDiscordWebhook("Raid Prevention (Global)", "https://unturnedstore.com/api/images/511", "Prevented Destruction", "7127038", "Raid Prevention (Global) by Gamingtoday093", "https://cdn.discordapp.com/attachments/545016765885972494/907732705553317939/User.png", player.DisplayName, instigatorSteamID.m_SteamID, barricade.asset.itemName, SteamGameServer.GetPublicIP().ToString()));
+                        var task = DiscordWebhook.SendDiscordWebhook(Config.DiscordWebhookURL, DiscordWebhook.FormatDiscordWebhook(
+                            "Raid Prevention (Global)",
+                            "https://unturnedstore.com/api/images/511",
+                            "Prevented Destruction", 7127038,
+                            "Raid Prevention (Global) by Gamingtoday093",
+                            "https://cdn.discordapp.com/attachments/545016765885972494/907732705553317939/User.png",
+                            player.DisplayName,
+                            instigatorSteamID.m_SteamID,
+                            barricade.asset.itemName,
+                            SteamGameServer.GetPublicIP().ToString()));
                         Task.Run(async () => await task);
                     }
                     return;
@@ -123,20 +134,19 @@ namespace RaidPrevention
                 if ((ulong)instigatorSteamID == barricade.GetServersideData().owner && Config.AllowSelfDestruction) return;
                 if ((ulong)player.SteamGroupID == barricade.GetServersideData().group && player.SteamGroupID != null && Config.AllowGroupDestruction) return;
 
-                if (barricade.GetServersideData().barricade.health <= pendingTotalDamage)
+                if (Config.OnlyPreventDestruction && barricade.GetServersideData().barricade.health > pendingTotalDamage) return;
+
+                pendingTotalDamage = 0;
+                shouldAllow = false;
+                UnturnedChat.Say(player, Translate("PreventedDestruction"), MessageColour);
+                if (Config.LogToConsole)
                 {
-                    pendingTotalDamage = 0;
-                    shouldAllow = false;
-                    UnturnedChat.Say(player, Translate("PreventedDestruction"), MessageColour);
-                    if (Config.LogToConsole)
-                    {
-                        Logger.LogError($"[RaidPrevention] {player.DisplayName} ({instigatorSteamID}) Tried to Destroy {barricade.asset.itemName}!");
-                    }
-                    if (Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
-                    {
-                        var task = DiscordWebhook.SendDiscordWebhook(Config.DiscordWebhookURL, DiscordWebhook.FormatDiscordWebhook("Raid Prevention (Global)", "https://unturnedstore.com/api/images/511", "Prevented Destruction", "7127038", "Raid Prevention (Global) by Gamingtoday093", "https://cdn.discordapp.com/attachments/545016765885972494/907732705553317939/User.png", player.DisplayName, instigatorSteamID.m_SteamID, barricade.asset.itemName, SteamGameServer.GetPublicIP().ToString()));
-                        Task.Run(async () => await task);
-                    }
+                    Logger.LogError($"[RaidPrevention] {player.DisplayName} ({instigatorSteamID}) Tried to Destroy {barricade.asset.itemName}!");
+                }
+                if (Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
+                {
+                    var task = DiscordWebhook.SendDiscordWebhook(Config.DiscordWebhookURL, DiscordWebhook.FormatDiscordWebhook("Raid Prevention (Global)", "https://unturnedstore.com/api/images/511", "Prevented Destruction", 7127038, "Raid Prevention (Global) by Gamingtoday093", "https://cdn.discordapp.com/attachments/545016765885972494/907732705553317939/User.png", player.DisplayName, instigatorSteamID.m_SteamID, barricade.asset.itemName, SteamGameServer.GetPublicIP().ToString()));
+                    Task.Run(async () => await task);
                 }
             }
         }
@@ -164,7 +174,17 @@ namespace RaidPrevention
                 }
                 if (Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
                 {
-                    var task = DiscordWebhook.SendDiscordWebhook(Config.DiscordWebhookURL, DiscordWebhook.FormatDiscordWebhook("Raid Prevention (Global)", "https://unturnedstore.com/api/images/511", "Prevented Destruction", "7127038", "Raid Prevention (Global) by Gamingtoday093", "https://cdn.discordapp.com/attachments/545016765885972494/907732705553317939/User.png", player.DisplayName, player.CSteamID.m_SteamID, crop.asset.itemName, SteamGameServer.GetPublicIP().ToString()));
+                    var task = DiscordWebhook.SendDiscordWebhook(Config.DiscordWebhookURL, DiscordWebhook.FormatDiscordWebhook(
+                        "Raid Prevention (Global)",
+                        "https://unturnedstore.com/api/images/511",
+                        "Prevented Destruction",
+                        7127038,
+                        "Raid Prevention (Global) by Gamingtoday093",
+                        "https://cdn.discordapp.com/attachments/545016765885972494/907732705553317939/User.png",
+                        player.DisplayName,
+                        player.CSteamID.m_SteamID,
+                        crop.asset.itemName,
+                        SteamGameServer.GetPublicIP().ToString()));
                     Task.Run(async () => await task);
                 }
             }
