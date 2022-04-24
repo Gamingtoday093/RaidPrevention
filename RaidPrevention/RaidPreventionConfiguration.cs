@@ -15,6 +15,7 @@ namespace RaidPrevention
         public string DiscordWebhookURL { get; set; }
         public string ByPassPermission { get; set; }
         public bool AdminByPass { get; set; }
+        public bool OnlyPreventPlayerDamage { get; set; }
         public bool AllowSelfDestruction { get; set; }
         public bool AllowGroupDestruction { get; set; }
         public bool OnlyPreventDestruction { get; set; }
@@ -28,6 +29,7 @@ namespace RaidPrevention
             DiscordWebhookURL = "Webhook";
             ByPassPermission = "RaidPrevention.Bypass";
             AdminByPass = true;
+            OnlyPreventPlayerDamage = false;
             AllowSelfDestruction = true;
             AllowGroupDestruction = true;
             OnlyPreventDestruction = true;
