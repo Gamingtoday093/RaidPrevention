@@ -5,7 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Rocket.Unturned.Chat;
+using RaidPrevention.Models;
 using Rocket.Core.Logging;
+using Rocket.Unturned.Player;
 
 namespace RaidPrevention.Commands
 {
@@ -15,9 +17,9 @@ namespace RaidPrevention.Commands
 
         public string Name => "Battle";
 
-        public string Help => "";
+        public string Help => "Start and Stop Battles";
 
-        public string Syntax => "<Start || Stop>";
+        public string Syntax => "<Start | Stop> (Radius)";
 
         public List<string> Aliases => new List<string>();
 
@@ -27,27 +29,43 @@ namespace RaidPrevention.Commands
         {
             if (command.Length < 1)
             {
-                Logger.LogError($"RaidPrevention >> {RaidPrevention.Instance.Translate("BattleInvalid")}");
                 UnturnedChat.Say(caller, RaidPrevention.Instance.Translate("BattleInvalid"), RaidPrevention.Instance.MessageColour);
                 return;
             }
             
             if (command[0].ToLower() == "start")
             {
-                RaidPrevention.Instance.isBattle = true;
-                Logger.Log(RaidPrevention.Instance.Translate("BattleSuccessStart"));
-                UnturnedChat.Say(caller, RaidPrevention.Instance.Translate("BattleSuccessStart"), RaidPrevention.Instance.MessageColour);
-                return;
+                if (command.Length < 2)
+                {
+                    RaidPrevention.Instance.isBattle = true;
+                    UnturnedChat.Say(caller, RaidPrevention.Instance.Translate("BattleSuccessStart"), RaidPrevention.Instance.MessageColour);
+                }
+                else
+                {
+                    if (caller is ConsolePlayer)
+                    {
+                        Logger.LogError("[RaidPrevention] A Local Battle Can't be Started through the Console!");
+                        return;
+                    }
+
+                    if (!float.TryParse(command[1], out float radius))
+                    {
+                        UnturnedChat.Say(caller, RaidPrevention.Instance.Translate("BattleFailedParse"), RaidPrevention.Instance.MessageColour);
+                        return;
+                    }
+
+                    RaidPrevention.Instance.isBattle = true;
+                    RaidPrevention.Instance.localBattle = new LocalBattle((caller as UnturnedPlayer).Position, radius);
+                    UnturnedChat.Say(caller, RaidPrevention.Instance.Translate("BattleSuccessStartLocal", radius), RaidPrevention.Instance.MessageColour);
+                }
             } else if (command[0].ToLower() == "stop")
             {
                 RaidPrevention.Instance.isBattle = false;
-                Logger.Log(RaidPrevention.Instance.Translate("BattleSuccessStop"));
+                RaidPrevention.Instance.localBattle = null;
                 UnturnedChat.Say(caller, RaidPrevention.Instance.Translate("BattleSuccessStop"), RaidPrevention.Instance.MessageColour);
-                return;
             } else
             {
                 UnturnedChat.Say(caller, RaidPrevention.Instance.Translate("BattleInvalid"), RaidPrevention.Instance.MessageColour);
-                return;
             }
         }
     }

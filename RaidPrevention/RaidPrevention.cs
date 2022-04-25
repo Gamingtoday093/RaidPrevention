@@ -13,6 +13,7 @@ using Rocket.API.Collections;
 using Rocket.Unturned.Player;
 using Rocket.API;
 using RaidPrevention.Connections;
+using RaidPrevention.Models;
 
 namespace RaidPrevention
 {
@@ -22,12 +23,14 @@ namespace RaidPrevention
         public static RaidPreventionConfiguration Config { get; private set; }
         public Color MessageColour { get; private set; }
         public bool isBattle { get; set; }
+        public LocalBattle localBattle { get; set; }
         protected override void Load()
         {
             Instance = this;
             Config = Configuration.Instance;
             MessageColour = UnturnedChat.GetColorFromName(Config.MessageColour, Color.green);
             isBattle = false;
+            localBattle = null;
 
             InteractableFarm.OnHarvestRequested_Global += OnDestroyedCrop;
             BarricadeManager.onDamageBarricadeRequested += OnDestroyedBarricade;
@@ -47,7 +50,7 @@ namespace RaidPrevention
 
         public void OnDestroyedStructure(CSteamID instigatorSteamID, Transform structureTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
         {
-            if (isBattle) return;
+            if (isBattle && localBattle == null || isBattle && localBattle != null && (structureTransform.position - localBattle.Point).sqrMagnitude <= Mathf.Pow(localBattle.Radius, 2)) return;
             if (pendingTotalDamage <= 0) return;
 
             if (!Config.IsBlacklist && Config.BarricadeStructureIDs.Any(x => x.ToString() == structureTransform.name) || Config.IsBlacklist && !Config.BarricadeStructureIDs.Any(x => x.ToString() == structureTransform.name))
@@ -60,19 +63,22 @@ namespace RaidPrevention
 
                 if (playerExists && player.IsAdmin && Config.AdminByPass) return;
                 if (playerExists && ((IRocketPlayer)player).HasPermission(Config.ByPassPermission) && !player.IsAdmin) return;
-                if (playerExists && (ulong)instigatorSteamID == structure.GetServersideData().owner && Config.AllowSelfDestruction) return;
-                if (playerExists && (ulong)player.SteamGroupID == structure.GetServersideData().group && player.SteamGroupID != null && Config.AllowGroupDestruction) return;
+                if (Config.AllowSelfDestruction && playerExists && (ulong)instigatorSteamID == structure.GetServersideData().owner) return;
+                if (Config.AllowGroupDestruction && playerExists && (ulong)player.SteamGroupID == structure.GetServersideData().group && player.SteamGroupID != null) return;
+                if (Config.AllowGroupDestruction && playerExists && (ulong)GroupManager.getGroupInfo(player.CSteamID)?.groupID == structure.GetServersideData().group) return;
 
                 if (Config.OnlyPreventDestruction && structure.GetServersideData().structure.health > pendingTotalDamage) return;
 
                 pendingTotalDamage = 0;
                 shouldAllow = false;
-                if (playerExists)  UnturnedChat.Say(player, Translate("PreventedDestruction"), MessageColour);
-                if (playerExists && Config.LogToConsole)
+
+                if (!playerExists) return;
+                UnturnedChat.Say(player, Translate("PreventedDestruction"), MessageColour);
+                if (Config.LogToConsole)
                 {
                     Logger.LogError($"[RaidPrevention] {player.DisplayName} ({instigatorSteamID}) Tried to Destroy {structure.asset.itemName}!");
                 }
-                if (playerExists && Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
+                if (Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
                 {
                     var task = DiscordWebhook.SendDiscordWebhook(Config.DiscordWebhookURL, DiscordWebhook.FormatDiscordWebhook(
                         "Raid Prevention (Global)",
@@ -92,7 +98,7 @@ namespace RaidPrevention
 
         public void OnDestroyedBarricade(CSteamID instigatorSteamID, Transform barricadeTransform, ref ushort pendingTotalDamage, ref bool shouldAllow, EDamageOrigin damageOrigin)
         {
-            if (isBattle) return;
+            if (isBattle && localBattle == null || isBattle && localBattle != null && (barricadeTransform.position - localBattle.Point).sqrMagnitude <= Mathf.Pow(localBattle.Radius, 2)) return;
             if (pendingTotalDamage <= 0) return;
             if (damageOrigin == EDamageOrigin.Plant_Harvested) return;
 
@@ -110,17 +116,20 @@ namespace RaidPrevention
 
                 if (barricade.asset.build == EBuild.FARM)
                 {
-                    if (playerExists && (ulong)instigatorSteamID == barricade.GetServersideData().owner && Config.AllowSelfDestruction) return;
-                    if (playerExists && (ulong)player.SteamGroupID == barricade.GetServersideData().group && player.SteamGroupID != null && Config.AllowGroupDestruction) return;
+                    if (Config.AllowSelfDestruction && playerExists && (ulong)instigatorSteamID == barricade.GetServersideData().owner) return;
+                    if (Config.AllowGroupDestruction && playerExists && (ulong)player.SteamGroupID == barricade.GetServersideData().group && player.SteamGroupID != null) return;
+                    if (Config.AllowGroupDestruction && playerExists && (ulong)GroupManager.getGroupInfo(player.CSteamID)?.groupID == barricade.GetServersideData().group) return;
 
                     pendingTotalDamage = 0;
                     shouldAllow = false;
-                    if (playerExists) UnturnedChat.Say(player, Translate("PreventedDestruction"), MessageColour);
-                    if (playerExists && Config.LogToConsole)
+
+                    if (!playerExists) return;
+                    UnturnedChat.Say(player, Translate("PreventedDestruction"), MessageColour);
+                    if (Config.LogToConsole)
                     {
                         Logger.LogError($"[RaidPrevention] {player.CharacterName} ({instigatorSteamID}) Tried to Destroy {barricade.asset.itemName}!");
                     }
-                    if (playerExists && Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
+                    if (Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
                     {
                         var task = DiscordWebhook.SendDiscordWebhook(Config.DiscordWebhookURL, DiscordWebhook.FormatDiscordWebhook(
                             "Raid Prevention (Global)",
@@ -137,19 +146,22 @@ namespace RaidPrevention
                     return;
                 }
 
-                if (playerExists && (ulong)instigatorSteamID == barricade.GetServersideData().owner && Config.AllowSelfDestruction) return;
-                if (playerExists && (ulong)player.SteamGroupID == barricade.GetServersideData().group && player.SteamGroupID != null && Config.AllowGroupDestruction) return;
+                if (Config.AllowSelfDestruction && playerExists && (ulong)instigatorSteamID == barricade.GetServersideData().owner) return;
+                if (Config.AllowGroupDestruction && playerExists && (ulong)player.SteamGroupID == barricade.GetServersideData().group && player.SteamGroupID != null) return;
+                if (Config.AllowGroupDestruction && playerExists && (ulong)GroupManager.getGroupInfo(player.CSteamID)?.groupID == barricade.GetServersideData().group) return;
 
                 if (Config.OnlyPreventDestruction && barricade.GetServersideData().barricade.health > pendingTotalDamage) return;
 
                 pendingTotalDamage = 0;
                 shouldAllow = false;
-                if (playerExists) UnturnedChat.Say(player, Translate("PreventedDestruction"), MessageColour);
-                if (playerExists && Config.LogToConsole)
+
+                if (!playerExists) return;
+                UnturnedChat.Say(player, Translate("PreventedDestruction"), MessageColour);
+                if (Config.LogToConsole)
                 {
                     Logger.LogError($"[RaidPrevention] {player.DisplayName} ({instigatorSteamID}) Tried to Destroy {barricade.asset.itemName}!");
                 }
-                if (playerExists && Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
+                if (Config.DiscordWebhookURL.StartsWith("https://discord.com/api/webhooks/"))
                 {
                     var task = DiscordWebhook.SendDiscordWebhook(Config.DiscordWebhookURL, DiscordWebhook.FormatDiscordWebhook("Raid Prevention (Global)", "https://unturnedstore.com/api/images/511", "Prevented Destruction", 7127038, "Raid Prevention (Global) by Gamingtoday093", "https://cdn.discordapp.com/attachments/545016765885972494/907732705553317939/User.png", player.DisplayName, instigatorSteamID.m_SteamID, barricade.asset.itemName, SteamGameServer.GetPublicIP().ToString()));
                     Task.Run(async () => await task);
@@ -159,7 +171,7 @@ namespace RaidPrevention
 
         public void OnDestroyedCrop(InteractableFarm harvestable, SteamPlayer instigatorPlayer, ref bool shouldAllow)
         {
-            if (isBattle) return;
+            if (isBattle && localBattle == null || isBattle && localBattle != null && (harvestable.transform.position - localBattle.Point).sqrMagnitude <= Mathf.Pow(localBattle.Radius, 2)) return;
 
             UnturnedPlayer player = UnturnedPlayer.FromSteamPlayer(instigatorPlayer);
             if (player.IsAdmin && Config.AdminByPass) return;
@@ -170,8 +182,9 @@ namespace RaidPrevention
 
             if (!Config.IsBlacklist && Config.BarricadeStructureIDs.Contains(crop.asset.id) || Config.IsBlacklist && !Config.BarricadeStructureIDs.Contains(crop.asset.id))
             {
-                if ((ulong)player.CSteamID == crop.GetServersideData().owner && Config.AllowSelfDestruction) return;
-                if ((ulong)player.SteamGroupID == crop.GetServersideData().group && player.SteamGroupID != null && Config.AllowGroupDestruction) return;
+                if (Config.AllowSelfDestruction && (ulong)player.CSteamID == crop.GetServersideData().owner) return;
+                if (Config.AllowGroupDestruction && (ulong)player.SteamGroupID == crop.GetServersideData().group && player.SteamGroupID != null) return;
+                if (Config.AllowGroupDestruction && (ulong)GroupManager.getGroupInfo(player.CSteamID)?.groupID == crop.GetServersideData().group) return;
 
                 shouldAllow = false;
                 UnturnedChat.Say(player, Translate("PreventedDestruction"), MessageColour);
@@ -201,7 +214,9 @@ namespace RaidPrevention
         {
             { "PreventedDestruction", "Do not Destroy Barricades or Structures outside of a Faction Battle! Your Attempt has been Logged." },
             { "BattleInvalid", "You must specify Start or Stop!" },
+            { "BattleFailedParse", "Failed to Parse Radius" },
             { "BattleSuccessStart", "You successfully started the Battle! Barricades and Structures can now be Destroyed" },
+            { "BattleSuccessStartLocal", "You successfully started a local Battle with the Radius of {0}m! Barricades and Structures within this Radius can now be Destroyed" },
             { "BattleSuccessStop", "You successfully stopped the Battle! Barricades and Structures can no longer be Destroyed" }
         };
     }
