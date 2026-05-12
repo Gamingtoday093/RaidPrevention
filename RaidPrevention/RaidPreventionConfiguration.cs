@@ -13,6 +13,7 @@ namespace RaidPrevention
         public string MessageColour { get; set; }
         public bool LogToConsole { get; set; }
         public string DiscordWebhookURL { get; set; }
+        public bool DiscordWebhookHideServerIP { get; set; }
         public string ByPassPermission { get; set; }
         public bool AdminByPass { get; set; }
         public bool OnlyPreventPlayerDamage { get; set; }
@@ -27,6 +28,7 @@ namespace RaidPrevention
             MessageColour = "yellow";
             LogToConsole = true;
             DiscordWebhookURL = "Webhook";
+            DiscordWebhookHideServerIP = false;
             ByPassPermission = "RaidPrevention.Bypass";
             AdminByPass = true;
             OnlyPreventPlayerDamage = false;

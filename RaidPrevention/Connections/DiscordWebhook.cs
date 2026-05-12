@@ -32,7 +32,7 @@ namespace RaidPrevention.Connections
             }
         }
 
-        public static string FormatDiscordWebhook(string Username, string AvatarURL, string Title, int Color, string FooterText, string IconUrl, string PlayerName, ulong SteamID, string Build, string IP)
+        public static string FormatDiscordWebhook(string Username, string AvatarURL, string Title, string Color, string FooterText, string IconUrl, string PlayerName, ulong SteamID, string Build, string IP)
         {
             return JsonConvert.SerializeObject(new 
             {
@@ -43,7 +43,7 @@ namespace RaidPrevention.Connections
                     new
                     {
                         title = Title,
-                        color = Color,
+                        color = int.Parse(Color, System.Globalization.NumberStyles.HexNumber),
                         fields = new[]
                         {
                             new
